@@ -12,7 +12,7 @@ t_max = 10
 x_plaque = 5  # Position de la plaque
 y_plaque = 1  # Hauteur du centre du trou de la plaque
 r_plaque = 1  # Rayon du trou de la plaque
-x_trou = 3
+x_trou = 4
 r_trou = 1
 
 # Fonction d'évolution pour solve_ivp
@@ -47,7 +47,8 @@ def traverse_plaque(x_values, y_values):
 def atterrir_dans_trou_sol(x_values, y_values):
     for x, y in zip(x_values, y_values):
         # Vérifier si la balle est dans la plage horizontale du trou du sol
-        if x_trou - r <= x <= x_trou + r:
+        if x_trou - r_trou <= x <= x_trou + r_trou:
+
             # Vérifier si la balle touche le sol dans la plage du trou
             if y <= r:  # Le sol est au niveau y = 0, donc y <= r signifie qu'elle touche le sol
                 return True  # La balle atterrit dans le trou du sol
@@ -106,6 +107,13 @@ plt.figure(figsize=(8, 6))
 # Tracé de la plaque comme une ligne noire
 plt.axvline(x=x_plaque, color="black", linestyle="-", linewidth=2, label="Plaque")
 
+# Ajout du trou de la plaque
+trou_plaque = plt.Circle((x_plaque, y_plaque), r_plaque, color="black", alpha=0.1, label="Trou de la plaque")
+plt.gca().add_patch(trou_plaque)
+
+# Ajout du trou dans le sol
+trou_sol = plt.Circle((x_trou, 0), r_trou, color="blue", alpha=0.3, label="Trou dans le sol")
+plt.gca().add_patch(trou_sol)
 
 # Génération de trajectoires avec différentes vitesses initiales pour vx
 for vx0 in np.linspace(-5, 5, 10):  # Différentes vitesses initiales horizontales
@@ -117,17 +125,13 @@ for vx0 in np.linspace(-5, 5, 10):  # Différentes vitesses initiales horizontal
     y_values = solution.y[1]
 
     # Vérification si la trajectoire passe dans le trou de la plaque
-    if traverse_plaque(x_values, y_values):
+    if traverse_plaque(x_values, y_values) and atterrir_dans_trou_sol(x_values, y_values):
         color = 'green'  # La trajectoire passe dans le trou
     else:
         color = 'red'  # La trajectoire échoue
 
     # Tracé de la trajectoire
     plt.plot(x_values, y_values, color=color, alpha=0.6)
-
-# Ajout du trou de la plaque
-trou_plaque = plt.Circle((x_plaque, y_plaque), r_plaque, color="black", alpha=0.1, label="Trou de la plaque")
-plt.gca().add_patch(trou_plaque)
 
 # Réglages du graphique pour la 1.3
 plt.xlabel("Position x (m)")
