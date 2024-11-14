@@ -2,69 +2,125 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.integrate as spi
 
-def integrateur_simple(conditions_initiales, viteses, acceleration, masse_balle, rayon_balle, k, c, temps_simulation):   
-    # Initial conditions: [position_x, position_y, velocity_x, velocity_y]
-    etats_initiaux = conditions_initiales + viteses  # Concaténation des positions et des vitesses initiales
+# Paramètres
+m, r = 0.2, 0.05  # Masse et rayon de la balle
+g, c, k = 9.81, 5, 5000  # Constantes de simulation
+x0, y0 = 10, 10  # Position initiale
+t_max = 10
 
-    # Fonction définissant le système d'équations différentielles
-    def equations(t, etats):
-        x, y, vx, vy = etats  # Décomposer les états
+# Paramètres des obstacles
+x_plaque = 5  # Position de la plaque
+y_plaque = 1  # Hauteur du centre du trou de la plaque
+r_plaque = 0.75  # Rayon du trou de la plaque
 
-        # Accélérations selon x et y
-        ax = 0  # Aucune accélération en x (pas de force)
-        ay = -9.81  # Gravité en y
-        if y > rayon_balle:
-            ay += 0  # Pas de correction au-dessus du sol
-        else:
-            ay += -(k * (y - rayon_balle) + c * vy) / masse_balle  # Ajout de la force de rappel au contact
+# Fonction d'évolution pour solve_ivp
+def equations(t, z):
+    x, y, vx, vy = z
+    ax = 0  # Accélération horizontale nulle
 
-        return [vx, vy, ax, ay]
+    # Accélération verticale en fonction de la position de la balle
+    if y > r:  # Chute libre
+        ay = -g
+    else:  # Phase de rebond
+        ay = -g - k * (y - r) / m - c * vy / m
 
-    # Résolution du système avec solve_ivp
-    sol = spi.solve_ivp(equations, [0, temps_simulation], etats_initiaux, t_eval=np.linspace(0, temps_simulation, 500))
+    return [vx, vy, ax, ay]
 
-    # Création d'une figure avec une grille de 2x2 pour les sous-graphes
-    plt.figure(figsize=(12, 10))
+# Fonction pour vérifier si la balle passe dans le trou de la plaque
+def traverse_plaque(x_values, y_values):
+    for x, y in zip(x_values, y_values):
+        if x >= x_plaque - r and x <= x_plaque + r:
+            distance_to_center = abs(y - y_plaque)
+            if distance_to_center <= r_plaque:
+                return True  # La balle passe dans le trou
+    return False
 
-    # Tracé de la position x(t)
-    plt.subplot(2, 2, 1)
-    plt.plot(sol.t, sol.y[0], label='x(t)', color='blue')
-    plt.xlabel('Temps (s)')
-    plt.ylabel('Position x (m)')
-    plt.title('Position x en fonction du temps')
-    plt.legend()
-    plt.grid()
+# Simulation de la trajectoire
+initial_conditions = [x0, y0, -3, 0]  # Exemple de vitesse initiale
+solution = spi.solve_ivp(equations, [0, t_max], initial_conditions, t_eval=np.linspace(0, t_max, 1000))
+x_values = solution.y[0]
+y_values = solution.y[1]
 
-    # Tracé de la position y(t)
-    plt.subplot(2, 2, 2)
-    plt.plot(sol.t, sol.y[1], label='y(t)', color='orange')
-    plt.xlabel('Temps (s)')
-    plt.ylabel('Position y (m)')
-    plt.title('Position y en fonction du temps')
-    plt.legend()
-    plt.grid()
+# Création d'une figure avec une grille 2x2 pour les sous-graphes
+plt.figure(figsize=(12, 10))
 
-    # Tracé de la trajectoire y(x)
-    plt.subplot(2, 2, 3)
-    plt.plot(sol.y[0], sol.y[1], label='y(x)', color='purple')
-    plt.xlabel('Position x (m)')
-    plt.ylabel('Position y (m)')
-    plt.title('Trajectoire y en fonction de x')
-    plt.legend()
-    plt.grid()
+# Tracé de la position x(t)
+plt.subplot(2, 2, 1)
+plt.plot(solution.t, solution.y[0], label='x(t)', color='blue')
+plt.xlabel('Temps (s)')
+plt.ylabel('Position x (m)')
+plt.title('Position x en fonction du temps')
+plt.legend()
+plt.grid()
 
-    # Tracé des vitesses vx(t) et vy(t)
-    plt.subplot(2, 2, 4)
-    plt.plot(sol.t, sol.y[2], label="v_x(t)", linestyle='--', color='green')
-    plt.plot(sol.t, sol.y[3], label="v_y(t)", linestyle='--', color='red')
-    plt.xlabel('Temps (s)')
-    plt.ylabel('Vitesse (m/s)')
-    plt.title('Vitesses en fonction du temps')
-    plt.legend()
-    plt.grid()
+# Tracé de la position y(t)
+plt.subplot(2, 2, 2)
+plt.plot(solution.t, solution.y[1], label='y(t)', color='orange')
+plt.xlabel('Temps (s)')
+plt.ylabel('Position y (m)')
+plt.title('Position y en fonction du temps')
+plt.legend()
+plt.grid()
 
-    plt.tight_layout()
-    plt.show()
+# Tracé de la trajectoire y(x)
+plt.subplot(2, 2, 3)
+plt.plot(solution.y[0], solution.y[1], label='y(x)', color='purple')
+plt.xlabel('Position x (m)')
+plt.ylabel('Position y (m)')
+plt.title('Trajectoire y en fonction de x')
+plt.legend()
+plt.grid()
 
-# Appel de la fonction avec des paramètres
-integrateur_simple([10, 10], [-3, 0], 9.81, 0.2, 0.05, 5000, 5, 10)
+# Tracé des vitesses vx(t) et vy(t)
+plt.subplot(2, 2, 4)
+plt.plot(solution.t, solution.y[2], label="v_x(t)", linestyle='--', color='green')
+plt.plot(solution.t, solution.y[3], label="v_y(t)", linestyle='--', color='red')
+plt.xlabel('Temps (s)')
+plt.ylabel('Vitesse (m/s)')
+plt.title('Vitesses en fonction du temps')
+plt.legend()
+plt.grid()
+
+# Partie 1.3 : Trajectoires multiples avec la plaque
+plt.figure(figsize=(8, 6))
+
+# Tracé de la plaque comme une ligne noire
+plt.axvline(x=x_plaque, color="black", linestyle="-", linewidth=2, label="Plaque")
+
+# Génération de trajectoires avec différentes vitesses initiales pour vx
+for vx0 in np.linspace(-5, 5, 10):  # Différentes vitesses initiales horizontales
+    vy0 = 0  # Vitesse initiale verticale fixe
+    initial_conditions = [x0, y0, vx0, vy0]
+    solution = spi.solve_ivp(equations, [0, t_max], initial_conditions, t_eval=np.linspace(0, t_max, 1000))
+
+    x_values = solution.y[0]
+    y_values = solution.y[1]
+
+    # Vérification si la trajectoire passe dans le trou de la plaque
+    if traverse_plaque(x_values, y_values):
+        color = 'green'  # La trajectoire passe dans le trou
+    else:
+        color = 'red'  # La trajectoire échoue
+
+    # Tracé de la trajectoire
+    plt.plot(x_values, y_values, color=color, alpha=0.6)
+
+# Ajout du trou de la plaque
+trou_plaque = plt.Circle((x_plaque, y_plaque), r_plaque, color="black", alpha=0.1, label="Trou de la plaque")
+plt.gca().add_patch(trou_plaque)
+
+# Réglages du graphique pour la 1.3
+plt.xlabel("Position x (m)")
+plt.ylabel("Position y (m)")
+plt.title("Multiples trajectoires avec obstacles")
+plt.legend()
+plt.grid()
+plt.xlim(0, x0 + 2)
+plt.ylim(-1, y0 + 2)
+plt.gca().set_aspect('equal', adjustable='box')
+
+# Affichage
+plt.tight_layout()
+plt.show()
+
+
