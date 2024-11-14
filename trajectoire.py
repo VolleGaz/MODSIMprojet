@@ -11,32 +11,51 @@ t_max = 10
 # Paramètres des obstacles
 x_plaque = 5  # Position de la plaque
 y_plaque = 1  # Hauteur du centre du trou de la plaque
-r_plaque = 0.75  # Rayon du trou de la plaque
+r_plaque = 1  # Rayon du trou de la plaque
+x_trou = 3
+r_trou = 1
 
 # Fonction d'évolution pour solve_ivp
 def equations(t, z):
     x, y, vx, vy = z
     ax = 0  # Accélération horizontale nulle
+    ay = -g  # Accélération verticale par défaut
 
-    # Accélération verticale en fonction de la position de la balle
-    if y > r:  # Chute libre
-        ay = -g
-    else:  # Phase de rebond
+    # Vérifier si la balle est sous la plaque et rebondir si nécessaire
+    if y <= y_plaque + r_plaque and (x_plaque - r <= x <= x_plaque + r):
+        # La balle touche la plaque, on inverse la vitesse verticale
+        vy = -vy * 0.8  # Coefficient de restitution pour l'élasticité du rebond
+        y = y_plaque + r_plaque  # Assurer que la balle ne passe pas à travers la plaque
+    elif y > r:  # Chute libre
+        ay = -g  # Accélération gravitationnelle (avant la plaque)
+    else:  # Phase de rebond (sur le sol ou après un rebond sur la plaque)
         ay = -g - k * (y - r) / m - c * vy / m
 
     return [vx, vy, ax, ay]
 
+
 # Fonction pour vérifier si la balle passe dans le trou de la plaque
 def traverse_plaque(x_values, y_values):
     for x, y in zip(x_values, y_values):
-        if x >= x_plaque - r and x <= x_plaque + r:
+        if x_plaque - r <= x <= x_plaque + r:
             distance_to_center = abs(y - y_plaque)
             if distance_to_center <= r_plaque:
                 return True  # La balle passe dans le trou
     return False
 
-# Simulation de la trajectoire
-initial_conditions = [x0, y0, -3, 0]  # Exemple de vitesse initiale
+# Fonction pour vérifier si la balle atterrit dans le trou du sol
+def atterrir_dans_trou_sol(x_values, y_values):
+    for x, y in zip(x_values, y_values):
+        # Vérifier si la balle est dans la plage horizontale du trou du sol
+        if x_trou - r <= x <= x_trou + r:
+            # Vérifier si la balle touche le sol dans la plage du trou
+            if y <= r:  # Le sol est au niveau y = 0, donc y <= r signifie qu'elle touche le sol
+                return True  # La balle atterrit dans le trou du sol
+    return False
+
+
+# Simulation avec une vitesse initiale modifiée
+initial_conditions = [x0, y0, -3, 0]  # Exemple de vitesse initiale (ajustée si nécessaire)
 solution = spi.solve_ivp(equations, [0, t_max], initial_conditions, t_eval=np.linspace(0, t_max, 1000))
 x_values = solution.y[0]
 y_values = solution.y[1]
@@ -87,6 +106,7 @@ plt.figure(figsize=(8, 6))
 # Tracé de la plaque comme une ligne noire
 plt.axvline(x=x_plaque, color="black", linestyle="-", linewidth=2, label="Plaque")
 
+
 # Génération de trajectoires avec différentes vitesses initiales pour vx
 for vx0 in np.linspace(-5, 5, 10):  # Différentes vitesses initiales horizontales
     vy0 = 0  # Vitesse initiale verticale fixe
@@ -122,5 +142,3 @@ plt.gca().set_aspect('equal', adjustable='box')
 # Affichage
 plt.tight_layout()
 plt.show()
-
-
