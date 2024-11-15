@@ -5,7 +5,7 @@ def plot_simulation_results():
     """
     Plots the results of the ball's motion over time and its trajectory.
     """
-    initial_conditions = [10, 10, -3, 0]  # Example of initial velocity
+    initial_conditions = [X0, Y0, VX0, VY0]  # Example of initial velocity
     solution, x_values, y_values = run_simulation(initial_conditions)
 
     # Create a 2x2 grid of subplots
