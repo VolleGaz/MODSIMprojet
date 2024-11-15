@@ -11,16 +11,9 @@ def equations(t, z):
     ay = -GRAVITY  # Vertical acceleration by default (gravity)
 
     # Check if the ball hits the plate and bounce if necessary
-    if PLATE_Y - PLATE_RADIUS < y + RADIUS < PLATE_Y + PLATE_RADIUS  and x <= PLATE_X :
-        # Ball hits the plate, invert vertical velocity
-        normal_v = vy  # Vertical velocity at impact
-        tangent_v = vx  # Horizontal velocity remains unchanged in this case
+    #if PLATE_Y - PLATE_RADIUS < y + RADIUS < PLATE_Y + PLATE_RADIUS  and x <= PLATE_X :
 
-        # Reflect the velocity vector and apply energy loss
-        vy = -COEFFICIENT_OF_RESTITUTION * normal_v
-        vx = tangent_v  # Optionally modify based on friction
-
-    elif y > RADIUS:  # Free fall
+    if y > RADIUS:  # Free fall
         ay = -GRAVITY  # Gravitational acceleration (before hitting the plate)
 
     else:  # Bounce phase (on the ground or after a plate bounce)
