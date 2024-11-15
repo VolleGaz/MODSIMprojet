@@ -1,6 +1,6 @@
 from constants import *
 
-def equations(z):
+def equations(t,z):
     """
     Defines the differential equations for the motion of the ball.
     z = [x, y, vx, vy] represents position and velocity.

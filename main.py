@@ -1,4 +1,3 @@
-# main.py
 from visualization import plot_simulation_results
 
 if __name__ == "__main__":
