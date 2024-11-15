@@ -4,6 +4,7 @@ RADIUS = 0.05  # Radius of the ball in meters
 GRAVITY = 9.81  # Gravitational acceleration in m/s²
 DRAG_COEFFICIENT = 5  # Air drag coefficient
 SPRING_CONSTANT = 5000  # Spring constant for vertical motion
+COEFFICIENT_OF_RESTITUTION = 0.8 # Coefficient of restitution for elasticity
 
 # Initial conditions
 X0 = 10  # Initial x position (m)

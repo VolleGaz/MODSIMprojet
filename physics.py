@@ -1,6 +1,7 @@
 from constants import *
 
-def equations(t,z):
+
+def equations(t, z):
     """
     Defines the differential equations for the motion of the ball.
     z = [x, y, vx, vy] represents position and velocity.
@@ -10,16 +11,23 @@ def equations(t,z):
     ay = -GRAVITY  # Vertical acceleration by default (gravity)
 
     # Check if the ball hits the plate and bounce if necessary
-    if y <= PLATE_Y + PLATE_RADIUS and (PLATE_X - RADIUS <= x <= PLATE_X + RADIUS):
+    if PLATE_Y - PLATE_RADIUS < y + RADIUS < PLATE_Y + PLATE_RADIUS  and x <= PLATE_X :
         # Ball hits the plate, invert vertical velocity
-        vy = -vy * 0.8  # Coefficient of restitution for elasticity
-        y = PLATE_Y + PLATE_RADIUS  # Ensure the ball does not pass through the plate
+        normal_v = vy  # Vertical velocity at impact
+        tangent_v = vx  # Horizontal velocity remains unchanged in this case
+
+        # Reflect the velocity vector and apply energy loss
+        vy = -COEFFICIENT_OF_RESTITUTION * normal_v
+        vx = tangent_v  # Optionally modify based on friction
+
     elif y > RADIUS:  # Free fall
         ay = -GRAVITY  # Gravitational acceleration (before hitting the plate)
+
     else:  # Bounce phase (on the ground or after a plate bounce)
         ay = -GRAVITY - SPRING_CONSTANT * (y - RADIUS) / MASS - DRAG_COEFFICIENT * vy / MASS
 
     return [vx, vy, ax, ay]
+
 
 def check_plate_collision(x_values, y_values):
     """
@@ -31,6 +39,7 @@ def check_plate_collision(x_values, y_values):
             if distance_to_center <= PLATE_RADIUS:
                 return True  # Ball passes through the hole
     return False
+
 
 def check_ground_hole_collision(x_values, y_values):
     """
