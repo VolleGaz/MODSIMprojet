@@ -50,9 +50,20 @@ def plot_simulation_results():
 
     # Multiple trajectories with obstacles
     plt.figure(figsize=(8, 6))
-    plt.axvline(x=PLATE_X, color="black", linestyle="-", linewidth=2, label="Plate")
-    plt.gca().add_patch(plt.Circle((PLATE_X, PLATE_Y), PLATE_RADIUS, color="black", alpha=0.1, label="Plate Hole"))
-    plt.gca().add_patch(plt.Circle((HOLE_X, 0), HOLE_RADIUS, color="blue", alpha=0.3, label="Ground Hole"))
+
+    # Draw the vertical plate line excluding the hole
+    plate_top = PLATE_Y + PLATE_RADIUS
+    plate_bottom = PLATE_Y - PLATE_RADIUS
+    plt.plot([PLATE_X, PLATE_X], [0, plate_bottom], color="black", linewidth=2, label="Plate (No Hole)")  # Bottom part
+    plt.plot([PLATE_X, PLATE_X], [plate_top, Y0 + 2], color="black", linewidth=2)  # Top part
+
+    # Draw the horizontal ground line excluding the hole
+    ground_left = HOLE_X - HOLE_RADIUS
+    ground_right = HOLE_X + HOLE_RADIUS
+    plt.plot([0, ground_left], [0, 0], color="black", linewidth=2, label="Ground (No Hole)")  # Left part
+    plt.plot([ground_right, X0 + 2], [0, 0], color="black", linewidth=2)  # Right part
+
+    
 
     # Plot multiple trajectories
     trajectories = get_multiple_trajectories()
