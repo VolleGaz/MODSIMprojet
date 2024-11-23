@@ -11,9 +11,16 @@ def equations(t, z):
     ay = -GRAVITY  # Vertical acceleration by default (gravity)
 
     # Check if the ball hits the plate and bounce if necessary
-    #if PLATE_Y - PLATE_RADIUS < y + RADIUS < PLATE_Y + PLATE_RADIUS  and x <= PLATE_X :
+    if (PLATE_X - RADIUS <= x <= PLATE_X + RADIUS) and check_plate_collision([x],[y]) and vy < 0: #attempt to make the ball bounce off the plate
+        # Reverse and reduce the vertical velocity
+        vy = -COEFFICIENT_OF_RESTITUTION * vy
+        # Adjust position to prevent continuous collision detection
+        y = PLATE_Y + RADIUS + 1e-5
 
-    if y > RADIUS:  # Free fall
+        # Acceleration due to spring force from plate deformation
+        ay = -GRAVITY - SPRING_CONSTANT * (y - PLATE_Y) / MASS - DRAG_COEFFICIENT * vy / MASS
+
+    elif y > RADIUS:  # Free fall
         ay = -GRAVITY  # Gravitational acceleration (before hitting the plate)
 
     else:  # Bounce phase (on the ground or after a plate bounce)

@@ -12,13 +12,14 @@ def run_simulation(initial_conditions):
     y_values = solution.y[1]
     return solution, x_values, y_values
 
+
 def get_multiple_trajectories():
     """
     Generates multiple trajectories with different horizontal velocities.
     """
     trajectories = []
     for vx0 in np.linspace(-5, 5, 10):  # Different initial horizontal velocities
-        vy0 = 0  # Fixed initial vertical velocity
+        vy0 = 0
         initial_conditions = [X0, Y0, vx0, vy0]
         solution, x_values, y_values = run_simulation(initial_conditions)
 
