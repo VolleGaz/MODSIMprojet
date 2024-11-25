@@ -8,7 +8,7 @@ COEFFICIENT_OF_RESTITUTION = 0.8 # Coefficient of restitution for elasticity
 
 # Initial conditions
 X0 = 10  # Initial x position (m)
-Y0 = 10  # Initial y position (m)
+Y0 = 5  # Initial y position (m)
 VX0 = -3  # Initial horizontal velocity (m/s)
 VY0 = 0  # Initial vertical velocity (m/s)
 TIME_MAX = 10  # Maximum time for the simulation (seconds)
